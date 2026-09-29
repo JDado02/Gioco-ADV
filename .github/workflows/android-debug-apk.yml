@@ -1,0 +1,136 @@
+# Esporta un APK di DEBUG di ORDA ZERO per Android e lo carica come artifact.
+#
+# - Parte a ogni push su main, su ogni pull request e a mano (pulsante "Run workflow").
+# - Scarica Godot e gli export templates ufficiali (versione in GODOT_VERSION).
+# - La keystore di DEBUG è generata qui dentro: nessuna chiave vive nella repo.
+#   Viene conservata nella cache di GitHub Actions, così gli APK successivi
+#   hanno la stessa firma e si installano sopra i precedenti senza disinstallare.
+#   (Non è un segreto: è una normale chiave di debug. La firma di release
+#   si farà più avanti con i GitHub Secrets.)
+
+name: APK di debug Android
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apk-debug-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.2"
+  GODOT_STATUS: "stable"
+
+jobs:
+  apk-debug:
+    name: Esporta APK di debug
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Scarica il codice
+        uses: actions/checkout@v5
+
+      - name: Installa Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Cache di Godot ed export templates
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-bin
+            ~/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.${{ env.GODOT_STATUS }}
+          key: godot-${{ env.GODOT_VERSION }}-${{ env.GODOT_STATUS }}-android-v1
+
+      - name: Scarica Godot ed export templates Android
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          TAG="${GODOT_VERSION}-${GODOT_STATUS}"
+          BASE="https://github.com/godotengine/godot/releases/download/${TAG}"
+          mkdir -p ~/godot-bin
+          curl -fsSL --retry 3 -o /tmp/godot.zip "${BASE}/Godot_v${TAG}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d ~/godot-bin
+          mv ~/godot-bin/Godot_v${TAG}_linux.x86_64 ~/godot-bin/godot
+          curl -fsSL --retry 3 -o /tmp/templates.tpz "${BASE}/Godot_v${TAG}_export_templates.tpz"
+          DEST=~/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_STATUS}
+          mkdir -p "$DEST"
+          # Servono solo i template Android: il resto (1+ GB) non viene estratto.
+          unzip -q -j /tmp/templates.tpz \
+            templates/android_debug.apk templates/android_release.apk templates/version.txt \
+            -d "$DEST"
+          rm /tmp/godot.zip /tmp/templates.tpz
+
+      - name: Configura Godot (percorsi Android SDK e Java)
+        run: |
+          set -euo pipefail
+          echo "$HOME/godot-bin" >> "$GITHUB_PATH"
+          MINOR=$(echo "$GODOT_VERSION" | cut -d. -f1,2)
+          mkdir -p ~/.config/godot
+          cat > ~/.config/godot/editor_settings-${MINOR}.tres <<EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "${ANDROID_SDK_ROOT}"
+          export/android/java_sdk_path = "${JAVA_HOME}"
+          EOF
+
+      - name: Recupera la keystore di debug dalla cache
+        id: cache-keystore
+        uses: actions/cache@v4
+        with:
+          path: ~/.orda-zero-debug-keystore
+          key: orda-zero-debug-keystore-v1
+
+      - name: Genera la keystore di debug (se non è in cache)
+        if: steps.cache-keystore.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.orda-zero-debug-keystore
+          keytool -genkeypair -noprompt \
+            -keystore ~/.orda-zero-debug-keystore/debug.keystore \
+            -storepass android -keypass android -alias androiddebugkey \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Orda Zero Debug, O=Orda Zero, C=IT"
+
+      - name: Passa la keystore a Godot
+        run: |
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$HOME/.orda-zero-debug-keystore/debug.keystore" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> "$GITHUB_ENV"
+
+      - name: Importa il progetto
+        run: godot --headless --import
+
+      - name: Esporta l'APK di debug
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          godot --headless --export-debug "Android" build/orda-zero-debug.apk
+          # Godot a volte esce con codice 0 anche se l'export fallisce: controlliamo il file.
+          test -s build/orda-zero-debug.apk
+          ls -lh build/orda-zero-debug.apk
+
+      - name: Verifica la firma dell'APK
+        run: |
+          set -euo pipefail
+          APKSIGNER=$(ls -d "$ANDROID_SDK_ROOT"/build-tools/*/ | sort -V | tail -1)apksigner
+          "$APKSIGNER" verify --verbose build/orda-zero-debug.apk
+
+      - name: Carica l'APK come artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: orda-zero-debug-apk
+          path: build/orda-zero-debug.apk
+          if-no-files-found: error
+          retention-days: 30
