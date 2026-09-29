@@ -1,0 +1,6 @@
+# Normalizza i fine riga (evita modifiche fantasma tra Windows e Linux)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ogg binary
+*.wav binary

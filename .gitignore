@@ -1,0 +1,14 @@
+# Cache e file generati da Godot
+.godot/
+/android/
+*.translation
+
+# Build
+build/
+*.apk
+*.aab
+
+# Chiavi e credenziali: MAI nella repository (è pubblica)
+*.keystore
+*.jks
+export_credentials.cfg
