@@ -1,0 +1,66 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/game/game.gd" id="1_game"]
+[ext_resource type="Script" path="res://scripts/game/track.gd" id="2_pista"]
+[ext_resource type="Script" path="res://scripts/game/crowd.gd" id="3_folla"]
+[ext_resource type="Script" path="res://scripts/game/bullet_manager.gd" id="4_proiettili"]
+[ext_resource type="Script" path="res://scripts/game/enemy_manager.gd" id="5_nemici"]
+[ext_resource type="Script" path="res://scripts/game/wave_director.gd" id="6_ondate"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="7_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/game_over.tscn" id="8_gameover"]
+
+[sub_resource type="Environment" id="Environment_cielo"]
+background_mode = 1
+background_color = Color(0.56, 0.78, 0.96, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.78, 0.83, 0.95, 1)
+ambient_light_energy = 0.55
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_game")
+
+[node name="Ambiente" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_cielo")
+
+[node name="Sole" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.96, -0.52, 0)
+light_energy = 1.1
+
+[node name="Camera3D" type="Camera3D" parent="."]
+keep_aspect = 0
+fov = 62.0
+far = 200.0
+
+[node name="Pista" type="Node3D" parent="."]
+script = ExtResource("2_pista")
+
+[node name="Folla" type="Node3D" parent="." node_paths=PackedStringArray("proiettili")]
+script = ExtResource("3_folla")
+proiettili = NodePath("../Proiettili")
+
+[node name="Contatore" type="Label3D" parent="Folla"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
+pixel_size = 0.012
+billboard = 1
+no_depth_test = true
+fixed_size = false
+modulate = Color(1, 1, 1, 1)
+outline_modulate = Color(0.05, 0.12, 0.35, 1)
+text = "0"
+font_size = 96
+outline_size = 26
+
+[node name="Proiettili" type="Node3D" parent="." node_paths=PackedStringArray("nemici")]
+script = ExtResource("4_proiettili")
+nemici = NodePath("../Nemici")
+
+[node name="Nemici" type="Node3D" parent="."]
+script = ExtResource("5_nemici")
+
+[node name="Ondate" type="Node" parent="." node_paths=PackedStringArray("nemici")]
+script = ExtResource("6_ondate")
+nemici = NodePath("../Nemici")
+
+[node name="HUD" parent="." instance=ExtResource("7_hud")]
+
+[node name="GameOver" parent="." instance=ExtResource("8_gameover")]

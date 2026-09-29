@@ -1,0 +1,59 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/game_over.gd" id="1_go"]
+
+[node name="GameOver" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_go")
+
+[node name="Sfondo" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03, 0.04, 0.08, 0.82)
+
+[node name="Centro" type="CenterContainer" parent="Sfondo"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Riquadro" type="VBoxContainer" parent="Sfondo/Centro"]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="Titolo" type="Label" parent="Sfondo/Centro/Riquadro"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.32, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0.15, 0.02, 0.02, 1)
+theme_override_constants/outline_size = 20
+theme_override_font_sizes/font_size = 96
+text = "GAME OVER"
+horizontal_alignment = 1
+
+[node name="Ondata" type="Label" parent="Sfondo/Centro/Riquadro"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 46
+text = "Ondata raggiunta: 0"
+horizontal_alignment = 1
+
+[node name="UnitaMassime" type="Label" parent="Sfondo/Centro/Riquadro"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Unità massime: 0"
+horizontal_alignment = 1
+
+[node name="Spazio" type="Control" parent="Sfondo/Centro/Riquadro"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="Riprova" type="Button" parent="Sfondo/Centro/Riquadro"]
+custom_minimum_size = Vector2(380, 120)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 52
+text = "Riprova"
