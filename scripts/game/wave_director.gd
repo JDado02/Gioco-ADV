@@ -4,6 +4,7 @@ extends Node
 ##
 ## Ondata n:  nemici = nemici_base + nemici_incremento × n
 ##            velocità = velocita_base + velocita_incremento_per_ondata × n (con tetto)
+##            vita = vita_base + vita_incremento_per_ondata × n
 ## I nemici di un'ondata compaiono a piccole squadre, distribuiti su
 ## `durata_comparsa` secondi. L'ondata finisce quando sono tutti comparsi e
 ## non ne resta nessuno in campo; dopo una pausa parte la successiva.
@@ -27,7 +28,8 @@ var _nemici_incremento: int
 var _durata_comparsa: float
 var _max_squadra: int
 var _pausa_tra_ondate: float
-var _vita: float
+var _vita_base: float
+var _vita_incremento: float
 var _vel_base: float
 var _vel_incremento: float
 var _vel_max: float
@@ -38,6 +40,7 @@ var _da_generare := 0
 var _intervallo := 0.0
 var _timer_comparsa := 0.0
 var _velocita_ondata := 0.0
+var _vita_ondata := 0.0
 var _in_pausa := true
 var _pausa := PAUSA_INIZIALE
 
@@ -48,7 +51,8 @@ func _ready() -> void:
 	_durata_comparsa = Config.num("ondate", "durata_comparsa")
 	_max_squadra = maxi(Config.intero("ondate", "dimensione_massima_squadra"), 1)
 	_pausa_tra_ondate = Config.num("ondate", "pausa_tra_ondate")
-	_vita = Config.num("nemici", "vita_base")
+	_vita_base = Config.num("nemici", "vita_base")
+	_vita_incremento = Config.num("nemici", "vita_incremento_per_ondata")
 	_vel_base = Config.num("nemici", "velocita_base")
 	_vel_incremento = Config.num("nemici", "velocita_incremento_per_ondata")
 	_vel_max = Config.num("nemici", "velocita_massima")
@@ -88,6 +92,7 @@ func _inizia_ondata() -> void:
 	_da_generare = nemici_per_ondata(ondata)
 	_intervallo = _durata_comparsa / _da_generare
 	_velocita_ondata = velocita_per_ondata(ondata)
+	_vita_ondata = _vita_base + _vita_incremento * ondata
 	_timer_comparsa = 0.0
 	ondata_iniziata.emit(ondata)
 
@@ -102,7 +107,7 @@ func _genera_squadra() -> void:
 	var centro := randf_range(-margine, margine)
 	for k in quanti:
 		var x := centro - ingombro * 0.5 + k * SPAZIO_SQUADRA
-		nemici.genera(x, -_distanza + randf_range(-0.6, 0.6), _vita, _velocita_ondata)
+		nemici.genera(x, -_distanza + randf_range(-0.6, 0.6), _vita_ondata, _velocita_ondata)
 	_da_generare -= quanti
 	# Il tempo fino alla prossima squadra è proporzionale ai nemici appena generati:
 	# in media l'ondata dura sempre `durata_comparsa` secondi.

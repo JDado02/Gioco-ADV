@@ -21,6 +21,7 @@ const RAGGIO_SOLDATO := 0.3
 const ANGOLO_AUREO := 2.39996323
 
 @export var proiettili: GestoreProiettili
+@export var arsenale: Arsenale
 
 ## Numero reale di unità.
 var unita := 0
@@ -33,8 +34,6 @@ var _cap: int
 var _passo_formazione: float
 var _ricompattamento: float
 var _meta_pista: float
-var _cadenza: float
-var _danno: float
 
 var _visibili := 0
 var _tempo := 0.0
@@ -52,8 +51,6 @@ func _ready() -> void:
 	_passo_formazione = Config.num("folla", "spaziatura_unita") * 0.6
 	_ricompattamento = Config.num("folla", "velocita_ricompattamento")
 	_meta_pista = Config.num("pista", "larghezza") * 0.5
-	_cadenza = maxf(Config.num("arma", "colpi_al_secondo"), 0.01)
-	_danno = Config.num("arma", "danno_per_colpo")
 
 	_off_x.resize(_cap)
 	_off_z.resize(_cap)
@@ -83,7 +80,7 @@ func imposta_unita(n: int) -> void:
 		var p := _posto_in_formazione(i)
 		_off_x[i] = p.x
 		_off_z[i] = p.y
-		_timer_sparo[i] = randf() / _cadenza
+		_timer_sparo[i] = randf() / arsenale.cadenza()
 	raggio = _passo_formazione * sqrt(maxf(_visibili - 1, 0)) + RAGGIO_SOLDATO
 	_mm.visible_instance_count = _visibili
 	_contatore.text = str(unita)
@@ -116,7 +113,9 @@ func aggiorna(delta: float) -> void:
 	sposta_di(0.0)  # la formazione può essersi allargata: resta dentro la pista
 
 	var k := 1.0 - exp(-_ricompattamento * delta)
-	var danno_aggregato := _danno * float(unita) / float(_visibili)
+	var arma := arsenale.arma()
+	var intervallo_sparo := 1.0 / arsenale.cadenza()
+	var danno_aggregato := arsenale.danno() * float(unita) / float(_visibili)
 	for i in _visibili:
 		var p := _posto_in_formazione(i)
 		_off_x[i] = lerpf(_off_x[i], p.x, k)
@@ -127,10 +126,10 @@ func aggiorna(delta: float) -> void:
 
 		_timer_sparo[i] -= delta
 		if _timer_sparo[i] <= 0.0:
-			_timer_sparo[i] += 1.0 / _cadenza
+			_timer_sparo[i] += intervallo_sparo
 			proiettili.spara(
 				Vector3(position.x + _off_x[i] + LATO_CANNA, ALTEZZA_CANNA, _off_z[i] - 0.5),
-				danno_aggregato)
+				danno_aggregato, arma)
 
 	_mm.visible_instance_count = _visibili
 	_mm.buffer = _buf

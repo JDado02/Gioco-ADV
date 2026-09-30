@@ -95,6 +95,28 @@ func colpisci(x: float, z_da: float, z_a: float, raggio_proiettile: float, danno
 	return danno
 
 
+## True se un proiettile che passa da z_a a z_da lungo la linea x tocca un nemico vivo.
+func tocca(x: float, z_da: float, z_a: float, raggio_proiettile: float) -> bool:
+	var r := _raggio + raggio_proiettile
+	for j in attivi:
+		if _vita[j] > VITA_MINIMA and _z[j] >= z_da - _raggio and _z[j] <= z_a + _raggio \
+				and absf(_x[j] - x) <= r:
+			return true
+	return false
+
+
+## Danno ad area (esplosioni): ogni nemico entro il raggio subisce `danno`.
+func danno_area(x: float, z: float, raggio_area: float, danno: float) -> void:
+	var r := raggio_area + _raggio
+	for j in attivi:
+		if _vita[j] <= VITA_MINIMA:
+			continue
+		var dx := _x[j] - x
+		var dz := _z[j] - z
+		if dx * dx + dz * dz <= r * r:
+			_vita[j] -= minf(danno, _vita[j])
+
+
 ## Muove i nemici verso la folla, gestisce morti e contatti.
 ## Restituisce il numero di unità del giocatore uccise in questo fotogramma.
 func aggiorna(delta: float, velocita_pista: float, folla_x: float, folla_raggio: float) -> int:

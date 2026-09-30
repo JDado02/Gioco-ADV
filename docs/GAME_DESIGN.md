@@ -78,10 +78,19 @@ Per ogni punto: la domanda aperta e, tra parentesi quadre, la scelta **provvisor
 9. **Limite visivo dei gruppi di nemici con contatore**: un gruppo diventa un'unica "squadra" con un numero sopra? Come si comporta quando viene colpito? (Fase 3)
 
 ### Unità e cancelli
-10. **Crescita moltiplicativa contro crescita lineare.** Con i cancelli ×N le unità (e la potenza di fuoco reale) possono crescere in modo esponenziale, mentre i nemici crescono in modo lineare: a lungo andare il gioco rischia di diventare facile. Serve un tetto alle unità o ai moltiplicatori, o una crescita della vita dei nemici? (Fase 2)
-11. **Arrotondamenti di ÷N e −N**: per difetto? Possono portare a 0 unità (game over immediato) o lasciano almeno 1 unità? (Fase 2)
-12. **Armi dai cancelli bonus**: "dura per tutta la partita" oppure "bonus temporanei". Ogni arma presa sale di un livello (fucile → mitragliatrice → lanciarazzi) o può anche sostituirne una migliore? (Fase 2)
-13. **Unità iniziali** non specificate. [15, sopra VISUAL_UNIT_CAP apposta per vedere il limite visivo in azione; da rivedere in Fase 2.]
+10. **Crescita moltiplicativa contro crescita lineare.** Con i cancelli ×N le unità (e la potenza di fuoco reale) possono crescere in modo esponenziale, mentre i nemici crescono in modo lineare. Nelle simulazioni della Fase 2, senza correttivi, anche un giocatore che non tocca lo schermo arrivava al tetto di unità e sopravviveva oltre 30 minuti.
+    [Scelte provvisorie, tutte nel file di bilanciamento:
+    - tetto di 250 unità (`unita_massime`);
+    - cancelli ×N meno frequenti (solo ×2) e malus più frequenti (dal 40% al 70%);
+    - **nuovo parametro, non previsto dal design:** la vita dei nemici cresce un po' a ogni ondata (`[nemici] vita_incremento_per_ondata`, oggi 0.8). Mettilo a 0 per tornare alla sola crescita del numero.
+
+    Con questi valori, nelle simulazioni un giocatore "perfetto" arriva all'ondata 60–80 (15–20 minuti), uno che non si muove all'ondata 15–45.]
+11. **Arrotondamenti di ÷N e −N**: per difetto? Possono portare a 0 unità?
+    [÷N arrotonda per difetto. Un malus lascia sempre almeno 1 unità (`unita_minime_dopo_malus`, mettilo a 0 per renderli mortali). Le coppie con due malus ("il male minore") arrivano solo dall'ondata 5 e mai due di fila, perché due di fila a inizio partita facevano perdere anche giocando perfettamente.]
+12. **Armi dai cancelli bonus**: "dura per tutta la partita" oppure "bonus temporanei"?
+    [Ogni ostacolo "arma" fa salire l'arma di un livello (fucile → mitragliatrice → lanciarazzi), che resta per tutta la partita. Gli altri ostacoli danno un bonus temporaneo: FUOCO RAPIDO (cadenza ×2 per 8 s) o COLPI POTENZIATI (danno ×2 per 8 s). La ricompensa è scritta sopra l'ostacolo, così si sceglie se vale la pena sparargli. Con l'arma migliore già in mano, la ricompensa è sempre temporanea.]
+13. **Unità iniziali** non specificate. [8 dalla Fase 2, quando sono arrivati i cancelli.]
+13b. **Ostacoli bonus non distrutti**: se la folla li raggiunge, le passano attraverso senza danni. Il rischio è solo aver sprecato colpi. [Da confermare: in alternativa potrebbero uccidere delle unità.]
 
 ### Boss e punteggio
 14. **Contatore per il mini boss**: si azzera dopo ogni boss? Contano anche i nemici morti per contatto? Le ondate si fermano mentre c'è il boss?

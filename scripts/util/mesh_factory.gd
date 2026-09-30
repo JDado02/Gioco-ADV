@@ -39,8 +39,18 @@ static func soldato(palette: Dictionary) -> ArrayMesh:
 
 
 ## Proiettile: bastoncino luminoso allungato lungo Z.
-static func proiettile(colore: Color) -> ArrayMesh:
-	return _unisci_blocchi([[Vector3(0.10, 0.10, 0.55), Vector3.ZERO, colore]])
+static func proiettile(colore: Color, dimensione: float = 1.0) -> ArrayMesh:
+	return _unisci_blocchi([[Vector3(0.10, 0.10, 0.55) * dimensione, Vector3.ZERO, colore]])
+
+
+## Sfera low-poly di raggio 1 (per le esplosioni), con colore per vertice.
+static func sfera(colore: Color) -> ArrayMesh:
+	var s := SphereMesh.new()
+	s.radius = 1.0
+	s.height = 2.0
+	s.radial_segments = 10
+	s.rings = 5
+	return _crea_mesh(_array_colorati(s.get_mesh_arrays(), Vector3.ZERO, colore))
 
 
 ## Albero low-poly per i bordi della pista (tronco + chioma a cono).

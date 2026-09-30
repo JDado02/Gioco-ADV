@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/game/game.gd" id="1_game"]
 [ext_resource type="Script" path="res://scripts/game/track.gd" id="2_pista"]
@@ -8,6 +8,9 @@
 [ext_resource type="Script" path="res://scripts/game/wave_director.gd" id="6_ondate"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="7_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/game_over.tscn" id="8_gameover"]
+[ext_resource type="Script" path="res://scripts/game/arsenal.gd" id="9_arsenale"]
+[ext_resource type="Script" path="res://scripts/game/gate_manager.gd" id="10_cancelli"]
+[ext_resource type="Script" path="res://scripts/game/effects.gd" id="11_effetti"]
 
 [sub_resource type="Environment" id="Environment_cielo"]
 background_mode = 1
@@ -34,9 +37,13 @@ far = 200.0
 [node name="Pista" type="Node3D" parent="."]
 script = ExtResource("2_pista")
 
-[node name="Folla" type="Node3D" parent="." node_paths=PackedStringArray("proiettili")]
+[node name="Arsenale" type="Node" parent="."]
+script = ExtResource("9_arsenale")
+
+[node name="Folla" type="Node3D" parent="." node_paths=PackedStringArray("proiettili", "arsenale")]
 script = ExtResource("3_folla")
 proiettili = NodePath("../Proiettili")
+arsenale = NodePath("../Arsenale")
 
 [node name="Contatore" type="Label3D" parent="Folla"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
@@ -50,12 +57,21 @@ text = "0"
 font_size = 96
 outline_size = 26
 
-[node name="Proiettili" type="Node3D" parent="." node_paths=PackedStringArray("nemici")]
+[node name="Cancelli" type="Node3D" parent="." node_paths=PackedStringArray("arsenale")]
+script = ExtResource("10_cancelli")
+arsenale = NodePath("../Arsenale")
+
+[node name="Proiettili" type="Node3D" parent="." node_paths=PackedStringArray("nemici", "cancelli", "effetti")]
 script = ExtResource("4_proiettili")
 nemici = NodePath("../Nemici")
+cancelli = NodePath("../Cancelli")
+effetti = NodePath("../Effetti")
 
 [node name="Nemici" type="Node3D" parent="."]
 script = ExtResource("5_nemici")
+
+[node name="Effetti" type="Node3D" parent="."]
+script = ExtResource("11_effetti")
 
 [node name="Ondate" type="Node" parent="." node_paths=PackedStringArray("nemici")]
 script = ExtResource("6_ondate")

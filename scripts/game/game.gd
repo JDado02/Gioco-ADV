@@ -1,7 +1,8 @@
 extends Node3D
 ## Scena principale della partita.
 ##
-## Coordina pista, folla, proiettili, nemici e ondate. L'ordine di
+## Coordina pista, arsenale, folla, cancelli, proiettili, nemici, effetti e
+## ondate. L'ordine di
 ## aggiornamento è deciso qui (e non dai _process dei singoli nodi) così ogni
 ## fotogramma si svolge sempre nella stessa sequenza.
 
@@ -19,9 +20,12 @@ var _sensibilita: float
 var _finita := false
 
 @onready var _pista: Pista = $Pista
+@onready var _arsenale: Arsenale = $Arsenale
 @onready var _folla: Folla = $Folla
+@onready var _cancelli: GestoreCancelli = $Cancelli
 @onready var _proiettili: GestoreProiettili = $Proiettili
 @onready var _nemici: GestoreNemici = $Nemici
+@onready var _effetti: GestoreEffetti = $Effetti
 @onready var _ondate: GestoreOndate = $Ondate
 @onready var _hud: Hud = $HUD
 @onready var _game_over: SchermataGameOver = $GameOver
@@ -39,7 +43,11 @@ func _ready() -> void:
 	_folla.annientata.connect(_fine_partita)
 	_ondate.ondata_iniziata.connect(_hud.mostra_ondata)
 	_game_over.riprova.connect(_riprova)
+	_cancelli.cancello_attraversato.connect(_on_cancello_attraversato)
+	_cancelli.ostacolo_distrutto.connect(_on_ostacolo_distrutto)
+	_arsenale.arma_cambiata.connect(_on_arma_cambiata)
 	_hud.aggiorna_unita(_folla.unita)
+	_on_arma_cambiata(_arsenale.arma())
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -58,12 +66,33 @@ func _process(delta: float) -> void:
 		return
 	var dt := minf(delta, DELTA_MASSIMO)
 	_pista.aggiorna(dt, _velocita_pista)
+	_arsenale.aggiorna(dt)
 	_folla.aggiorna(dt)
+	_cancelli.aggiorna(dt, _velocita_pista, _folla.position.x, _folla.unita, maxi(_ondate.ondata, 1))
 	_proiettili.aggiorna(dt)
 	var perdite := _nemici.aggiorna(dt, _velocita_pista, _folla.position.x, _folla.raggio)
 	_folla.perdi(perdite)
+	_effetti.aggiorna(dt, _velocita_pista)
+	_hud.aggiorna_bonus(_arsenale.descrizione_bonus())
 	if not _finita:
 		_ondate.aggiorna(dt)
+
+
+func _on_cancello_attraversato(cancello: Array) -> void:
+	var prima := _folla.unita
+	var dopo := _cancelli.regole.applica(cancello, prima)
+	_folla.imposta_unita(dopo)
+	_hud.mostra_esito("%s  →  %d" % [RegoleCancelli.testo(cancello), dopo], dopo >= prima)
+
+
+func _on_ostacolo_distrutto(ricompensa: String, posizione: Vector3) -> void:
+	_effetti.esplosione(posizione, 1.6)
+	_hud.mostra_esito(_arsenale.ottieni(ricompensa) + "!", true)
+
+
+func _on_arma_cambiata(arma: Dictionary) -> void:
+	_proiettili.imposta_arma(arma)
+	_hud.aggiorna_arma(arma.nome)
 
 
 func _fine_partita() -> void:

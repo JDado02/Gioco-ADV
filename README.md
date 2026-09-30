@@ -4,12 +4,14 @@ Shooter "crowd runner" per Android a ondate infinite, in 3D low-poly, fatto con 
 
 Guidi una folla di soldati che avanza da sola su una pista infinita. Trascini il dito a destra e a sinistra per spostarla, e i soldati sparano da soli. Le ondate di nemici sono sempre più numerose. Se ti toccano, perdi soldati. Quando i soldati finiscono, la partita è finita. Il punteggio è l'ondata che hai raggiunto.
 
+Lungo la pista arrivano coppie di cancelli (+N, -N, ×N, ÷N): scegli da quale passare, e a volte bisogna fare il conto. Ci sono anche barricate con dei punti vita. Se le abbatti sparando ottieni un'arma migliore (fucile → mitragliatrice → lanciarazzi) o un bonus temporaneo. Però mentre spari a loro non spari ai nemici.
+
 - Schermo verticale, lingua italiana, nessuna pubblicità né acquisto.
 - Difficile ma mai impossibile: conta la bravura, non la fortuna.
 - Il design completo è in [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md).
 
-> **Stato:** Fase 1 di 6 (pista infinita, folla, sparo automatico, nemici base, ondate, game over).
-> Cancelli, armi, varianti di nemici, boss e record arriveranno nelle fasi successive.
+> **Stato:** Fase 2 di 6 (in più rispetto alla Fase 1: cancelli a coppie, malus con limite, ostacoli bonus e armi).
+> Varianti di nemici, boss e record arriveranno nelle fasi successive.
 
 ## Scaricare e installare l'APK sul telefono
 
@@ -48,7 +50,7 @@ Struttura:
 | `scenes/main.tscn` | Scena della partita |
 | `scenes/ui/` | HUD e schermata di game over |
 | `scripts/autoload/config.gd` | Lettura del file di bilanciamento (`Config`) |
-| `scripts/game/` | Pista, folla, proiettili, nemici, ondate e regia della partita |
+| `scripts/game/` | Pista, folla, proiettili, nemici, ondate, cancelli, armi, effetti e regia della partita |
 | `scripts/ui/` | Script dell'interfaccia |
 | `scripts/util/` | Mesh low-poly generate via codice e aiuti per i MultiMesh |
 | `shaders/pista.gdshader` | Terreno della pista infinita |
