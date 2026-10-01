@@ -12,9 +12,11 @@ const COLORE_NEGATIVO := Color(1.0, 0.38, 0.32)
 @onready var _bonus: Label = $Radice/Bonus
 @onready var _esito: Label = $Radice/Esito
 @onready var _annuncio: Label = $Radice/Annuncio
+@onready var _avviso: Label = $Radice/Avviso
 
 var _tween_annuncio: Tween
 var _tween_esito: Tween
+var _tween_avviso: Tween
 
 
 func _ready() -> void:
@@ -39,6 +41,20 @@ func mostra_ondata(numero: int) -> void:
 	_ondata.text = "ONDATA %d" % numero
 	_annuncio.text = "ONDATA %d" % numero
 	_tween_annuncio = _anima(_annuncio, _tween_annuncio, 0.9)
+
+
+## Avviso grande e lampeggiante (es. "BOSS IN ARRIVO") per `durata` secondi.
+func mostra_avviso(testo: String, durata: float) -> void:
+	if _tween_avviso:
+		_tween_avviso.kill()
+	_avviso.text = testo
+	_avviso.visible = true
+	_tween_avviso = create_tween()
+	var lampeggi := maxi(int(durata / 0.5), 1)
+	for i in lampeggi:
+		_tween_avviso.tween_property(_avviso, "modulate:a", 0.25, 0.25)
+		_tween_avviso.tween_property(_avviso, "modulate:a", 1.0, 0.25)
+	_tween_avviso.tween_callback(func() -> void: _avviso.visible = false)
 
 
 ## Messaggio breve a centro schermo, verde se positivo e rosso se negativo.

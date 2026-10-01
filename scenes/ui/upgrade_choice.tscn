@@ -1,0 +1,79 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/upgrade_choice.gd" id="1_scelta"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_carta"]
+bg_color = Color(0.1, 0.22, 0.48, 0.96)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(1, 0.82, 0.25, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[node name="SceltaPotenziamento" type="CanvasLayer"]
+layer = 8
+script = ExtResource("1_scelta")
+
+[node name="Sfondo" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.08, 0.78)
+
+[node name="Centro" type="CenterContainer" parent="Sfondo"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Riquadro" type="VBoxContainer" parent="Sfondo/Centro"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="Titolo" type="Label" parent="Sfondo/Centro/Riquadro"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.86, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.08, 0.02, 1)
+theme_override_constants/outline_size = 16
+theme_override_font_sizes/font_size = 54
+text = "BOSS SCONFITTO!
+Scegli un potenziamento"
+horizontal_alignment = 1
+
+[node name="Carta1" type="Button" parent="Sfondo/Centro/Riquadro"]
+custom_minimum_size = Vector2(600, 170)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBox_carta")
+theme_override_styles/hover = SubResource("StyleBox_carta")
+theme_override_styles/pressed = SubResource("StyleBox_carta")
+text = "TITOLO
+descrizione"
+
+[node name="Carta2" type="Button" parent="Sfondo/Centro/Riquadro"]
+custom_minimum_size = Vector2(600, 170)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBox_carta")
+theme_override_styles/hover = SubResource("StyleBox_carta")
+theme_override_styles/pressed = SubResource("StyleBox_carta")
+text = "TITOLO
+descrizione"
+
+[node name="Carta3" type="Button" parent="Sfondo/Centro/Riquadro"]
+custom_minimum_size = Vector2(600, 170)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBox_carta")
+theme_override_styles/hover = SubResource("StyleBox_carta")
+theme_override_styles/pressed = SubResource("StyleBox_carta")
+text = "TITOLO
+descrizione"

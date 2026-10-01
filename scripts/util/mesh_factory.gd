@@ -58,6 +58,16 @@ const PALETTE_NEMICO_TIRATORE := {
 	"cintura": Color(0.95, 0.85, 0.3),
 }
 
+## Mini boss: giacca rossa e capelli biondi a spazzola (al posto dell'elmetto).
+const PALETTE_BOSS := {
+	"divisa": Color(0.82, 0.1, 0.1),
+	"elmetto": Color(1.0, 0.82, 0.18),
+	"pantaloni": Color(0.18, 0.18, 0.22),
+	"pelle": Color(0.95, 0.75, 0.6),
+	"arma": Color(0.2, 0.2, 0.22),
+	"cintura": Color(0.95, 0.95, 0.95),
+}
+
 ## Fattore di grandezza dei soldati (folla e nemici).
 const SCALA_SOLDATO := 1.3
 

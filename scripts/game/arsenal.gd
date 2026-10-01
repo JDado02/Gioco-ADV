@@ -21,7 +21,16 @@ const NOMI_BONUS := {
 ## Livello dell'arma attuale (0 = prima arma della sequenza).
 var livello := 0
 
+## Potenziamenti permanenti (scelti dopo i boss sconfitti).
+var molt_cadenza := 1.0
+var molt_danno := 1.0
+var molt_gittata := 1.0
+## Danno ad area aggiuntivo dei colpi normali (raggio 0 = nessuno).
+var area_raggio := 0.0
+var area_frazione := 0.0
+
 var _armi: Array[Dictionary] = []
+var _arma_effettiva: Dictionary
 var _molt_rapido: float
 var _durata_rapido: float
 var _molt_potenziati: float
@@ -42,6 +51,7 @@ func _ready() -> void:
 	_durata_rapido = Config.num("bonus_temporanei", "fuoco_rapido_durata")
 	_molt_potenziati = Config.num("bonus_temporanei", "colpi_potenziati_moltiplicatore")
 	_durata_potenziati = Config.num("bonus_temporanei", "colpi_potenziati_durata")
+	ricalcola_arma()
 
 
 func aggiorna(delta: float) -> void:
@@ -49,8 +59,15 @@ func aggiorna(delta: float) -> void:
 	_timer_potenziati = maxf(_timer_potenziati - delta, 0.0)
 
 
+## L'arma attuale, con i potenziamenti permanenti già applicati.
 func arma() -> Dictionary:
-	return _armi[livello]
+	return _arma_effettiva
+
+
+## Da chiamare dopo aver cambiato arma o potenziamenti che la modificano.
+func ricalcola_arma() -> void:
+	_arma_effettiva = _armi[livello].duplicate()
+	_arma_effettiva.gittata *= molt_gittata
 
 
 func al_massimo() -> bool:
@@ -64,7 +81,7 @@ func nome_prossima_arma() -> String:
 
 ## Colpi al secondo di ogni unità, compresi i bonus temporanei.
 func cadenza() -> float:
-	var c: float = arma().colpi_al_secondo
+	var c: float = arma().colpi_al_secondo * molt_cadenza
 	if _timer_rapido > 0.0:
 		c *= _molt_rapido
 	return maxf(c, 0.01)
@@ -72,7 +89,7 @@ func cadenza() -> float:
 
 ## Danno di un colpo di una singola unità, compresi i bonus temporanei.
 func danno() -> float:
-	var d: float = arma().danno_per_colpo
+	var d: float = arma().danno_per_colpo * molt_danno
 	if _timer_potenziati > 0.0:
 		d *= _molt_potenziati
 	return d
@@ -84,6 +101,7 @@ func ottieni(ricompensa: String) -> String:
 		RICOMPENSA_ARMA:
 			if not al_massimo():
 				livello += 1
+				ricalcola_arma()
 				arma_cambiata.emit(arma())
 			return arma().nome
 		FUOCO_RAPIDO:

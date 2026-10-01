@@ -29,6 +29,8 @@ var unita := 0
 var unita_massime := 0
 ## Raggio della formazione visibile (usato per contatti e limiti della pista).
 var raggio := RAGGIO_SOLDATO
+## Probabilità che un'unità sopravviva a un colpo (potenziamento "soldati corazzati").
+var resistenza := 0.0
 
 var _cap: int
 var _passo_formazione: float
@@ -96,9 +98,19 @@ func aggiungi(n: int) -> void:
 	imposta_unita(unita + n)
 
 
-func perdi(n: int) -> void:
-	if n > 0 and unita > 0:
+## Perde n unità; con la resistenza una parte sopravvive.
+## Restituisce quante unità sono state davvero perse.
+func perdi(n: int) -> int:
+	if n <= 0 or unita <= 0:
+		return 0
+	if resistenza > 0.0:
+		# Sopravvissuti attesi, con arrotondamento casuale per i decimali.
+		var salvati := n * resistenza
+		n -= int(salvati) + (1 if randf() < salvati - int(salvati) else 0)
+	n = mini(n, unita)
+	if n > 0:
 		imposta_unita(unita - n)
+	return n
 
 
 ## Sposta la folla di lato (in metri di gioco), senza uscire dalla pista.

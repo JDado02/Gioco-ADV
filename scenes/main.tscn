@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/game/game.gd" id="1_game"]
 [ext_resource type="Script" path="res://scripts/game/track.gd" id="2_pista"]
@@ -11,6 +11,8 @@
 [ext_resource type="Script" path="res://scripts/game/arsenal.gd" id="9_arsenale"]
 [ext_resource type="Script" path="res://scripts/game/gate_manager.gd" id="10_cancelli"]
 [ext_resource type="Script" path="res://scripts/game/effects.gd" id="11_effetti"]
+[ext_resource type="Script" path="res://scripts/game/boss_manager.gd" id="12_boss"]
+[ext_resource type="PackedScene" path="res://scenes/ui/upgrade_choice.tscn" id="13_scelta"]
 
 [sub_resource type="Environment" id="Environment_cielo"]
 background_mode = 1
@@ -65,11 +67,13 @@ outline_size = 26
 script = ExtResource("10_cancelli")
 arsenale = NodePath("../Arsenale")
 
-[node name="Proiettili" type="Node3D" parent="." node_paths=PackedStringArray("nemici", "cancelli", "effetti")]
+[node name="Proiettili" type="Node3D" parent="." node_paths=PackedStringArray("nemici", "cancelli", "effetti", "boss", "arsenale")]
 script = ExtResource("4_proiettili")
 nemici = NodePath("../Nemici")
 cancelli = NodePath("../Cancelli")
 effetti = NodePath("../Effetti")
+boss = NodePath("../Boss")
+arsenale = NodePath("../Arsenale")
 
 [node name="Nemici" type="Node3D" parent="."]
 script = ExtResource("5_nemici")
@@ -81,6 +85,14 @@ script = ExtResource("11_effetti")
 script = ExtResource("6_ondate")
 nemici = NodePath("../Nemici")
 
+[node name="Boss" type="Node3D" parent="." node_paths=PackedStringArray("nemici", "ondate", "effetti")]
+script = ExtResource("12_boss")
+nemici = NodePath("../Nemici")
+ondate = NodePath("../Ondate")
+effetti = NodePath("../Effetti")
+
 [node name="HUD" parent="." instance=ExtResource("7_hud")]
+
+[node name="SceltaPotenziamento" parent="." instance=ExtResource("13_scelta")]
 
 [node name="GameOver" parent="." instance=ExtResource("8_gameover")]

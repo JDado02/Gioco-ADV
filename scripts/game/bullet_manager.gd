@@ -16,6 +16,8 @@ const MAX_PROIETTILI := 512
 @export var nemici: GestoreNemici
 @export var cancelli: GestoreCancelli
 @export var effetti: GestoreEffetti
+@export var boss: GestoreBoss
+@export var arsenale: Arsenale
 
 var _attivi := 0
 var _x := PackedFloat32Array()
@@ -94,9 +96,15 @@ func aggiorna(delta: float) -> void:
 		if _esplosione[i] > 0.0:
 			finito = _gestisci_razzo(i, z_dopo, z_prima)
 		else:
-			var residuo := cancelli.colpisci(_x[i], z_dopo, z_prima, _raggio[i], _danno[i])
+			var iniziale := _danno[i]
+			var residuo := cancelli.colpisci(_x[i], z_dopo, z_prima, _raggio[i], iniziale)
+			if residuo > 0.0:
+				residuo = boss.colpisci(_x[i], z_dopo, z_prima, _raggio[i], residuo)
 			if residuo > 0.0:
 				residuo = nemici.colpisci(_x[i], z_dopo, z_prima, _raggio[i], residuo)
+			if residuo < iniziale and arsenale.area_raggio > 0.0:
+				# Potenziamento "colpi esplosivi": ferisce anche chi sta intorno.
+				nemici.danno_area(_x[i], z_dopo, arsenale.area_raggio, (iniziale - residuo) * arsenale.area_frazione)
 			_danno[i] = residuo
 			finito = residuo <= 0.0
 		_percorso[i] += passo
@@ -114,10 +122,12 @@ func aggiorna(delta: float) -> void:
 func _gestisci_razzo(i: int, z_dopo: float, z_prima: float) -> bool:
 	var x := _x[i]
 	var r := _raggio[i]
-	if not (nemici.tocca(x, z_dopo, z_prima, r) or cancelli.tocca(x, z_dopo, z_prima, r)):
+	if not (nemici.tocca(x, z_dopo, z_prima, r) or cancelli.tocca(x, z_dopo, z_prima, r) \
+			or boss.tocca(x, z_dopo, z_prima, r)):
 		return false
-	var raggio_esplosione := _esplosione[i]
+	var raggio_esplosione := _esplosione[i] + arsenale.area_raggio
 	nemici.danno_area(x, z_dopo, raggio_esplosione, _danno[i])
+	boss.danno_area(x, z_dopo, raggio_esplosione, _danno[i])
 	cancelli.danno_area(x, z_dopo, raggio_esplosione, _danno[i])
 	effetti.esplosione(Vector3(x, _y[i], z_dopo), raggio_esplosione)
 	return true
