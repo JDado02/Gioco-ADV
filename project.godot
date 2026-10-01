@@ -16,10 +16,12 @@ config/version="0.1.0"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
+config/quit_on_go_back=false
 
 [autoload]
 
 Config="*res://scripts/autoload/config.gd"
+Dati="*res://scripts/autoload/dati.gd"
 
 [display]
 

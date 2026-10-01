@@ -1,10 +1,12 @@
 extends Node3D
-## Scena principale della partita.
+## Scena principale.
 ##
 ## Coordina pista, arsenale, folla, cancelli, proiettili, nemici, boss,
-## effetti e ondate. L'ordine di
-## aggiornamento è deciso qui (e non dai _process dei singoli nodi) così ogni
-## fotogramma si svolge sempre nella stessa sequenza.
+## effetti e ondate, più il menu, la pausa, la scelta dei potenziamenti e il
+## game over. L'ordine di aggiornamento è deciso qui (e non dai _process dei
+## singoli nodi) così ogni fotogramma si svolge sempre nella stessa sequenza.
+
+enum Stato { MENU, GIOCO, PAUSA, SCELTA, FINITA }
 
 ## Limite al passo di tempo: dopo un rallentamento (o al ritorno
 ## dall'app in background) il gioco non fa "salti" enormi.
@@ -14,12 +16,11 @@ const DELTA_MASSIMO := 1.0 / 20.0
 const CAMERA_POSIZIONE := Vector3(0.0, 9.0, 8.0)
 const CAMERA_BERSAGLIO := Vector3(0.0, 0.0, -14.0)
 
+var stato := Stato.MENU
+
 var _velocita_pista: float
 var _larghezza_pista: float
 var _sensibilita: float
-var _finita := false
-## True mentre è aperta la scelta del potenziamento: il mondo è fermo.
-var _in_scelta := false
 var _potenziamenti := Potenziamenti.new()
 
 @onready var _pista: Pista = $Pista
@@ -31,6 +32,8 @@ var _potenziamenti := Potenziamenti.new()
 @onready var _effetti: GestoreEffetti = $Effetti
 @onready var _ondate: GestoreOndate = $Ondate
 @onready var _boss: GestoreBoss = $Boss
+@onready var _menu: MenuPrincipale = $Menu
+@onready var _pausa: SchermataPausa = $Pausa
 @onready var _scelta: SceltaPotenziamento = $SceltaPotenziamento
 @onready var _hud: Hud = $HUD
 @onready var _game_over: SchermataGameOver = $GameOver
@@ -47,7 +50,6 @@ func _ready() -> void:
 	_folla.unita_cambiate.connect(_hud.aggiorna_unita)
 	_folla.annientata.connect(_fine_partita)
 	_ondate.ondata_iniziata.connect(_hud.mostra_ondata)
-	_game_over.riprova.connect(_riprova)
 	_cancelli.cancello_attraversato.connect(_on_cancello_attraversato)
 	_cancelli.ostacolo_distrutto.connect(_on_ostacolo_distrutto)
 	_arsenale.arma_cambiata.connect(_on_arma_cambiata)
@@ -57,12 +59,39 @@ func _ready() -> void:
 	_boss.colpo_a_segno.connect(func(perse: int) -> void: _hud.mostra_esito("-%d" % perse, false))
 	_boss.sconfitto.connect(_on_boss_sconfitto)
 	_scelta.scelto.connect(_on_potenziamento_scelto)
+	_menu.gioca.connect(_inizia_partita)
+	_hud.pausa_premuta.connect(_metti_in_pausa)
+	_pausa.riprendi.connect(_riprendi)
+	_pausa.menu.connect(_torna_al_menu)
+	_game_over.riprova.connect(_riprova)
+	_game_over.menu.connect(_torna_al_menu)
 	_hud.aggiorna_unita(_folla.unita)
 	_on_arma_cambiata(_arsenale.arma())
 
+	if Dati.avvio_diretto:
+		Dati.avvio_diretto = false
+		_inizia_partita()
+	else:
+		_hud.visible = false
+		_folla.visible = false
+		_menu.visible = true
+
+
+func _notification(what: int) -> void:
+	# Tasto "indietro" di Android: pausa in partita, chiude l'app dal menu.
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		match stato:
+			Stato.GIOCO: _metti_in_pausa()
+			Stato.PAUSA: _riprendi()
+			Stato.MENU: get_tree().quit()
+			Stato.FINITA: _torna_al_menu()
+	# Se l'app va in background durante la partita, si mette in pausa da sola.
+	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT and stato == Stato.GIOCO:
+		_metti_in_pausa()
+
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _finita or _in_scelta:
+	if stato != Stato.GIOCO:
 		return
 	# Trascinamento libero: conta solo lo spostamento orizzontale del dito,
 	# ovunque sia appoggiato sullo schermo. (Col mouse funziona uguale grazie
@@ -73,9 +102,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
-	if _finita or _in_scelta:
-		return
 	var dt := minf(delta, DELTA_MASSIMO)
+	if stato == Stato.MENU:
+		_pista.aggiorna(dt, 0.0)  # nel menu si muovono solo mare e braci
+		return
+	if stato != Stato.GIOCO:
+		return
 	_pista.aggiorna(dt, _velocita_pista)
 	_arsenale.aggiorna(dt)
 	_folla.aggiorna(dt)
@@ -86,9 +118,54 @@ func _process(delta: float) -> void:
 	_folla.perdi(perdite)
 	_effetti.aggiorna(dt, _velocita_pista)
 	_hud.aggiorna_bonus(_arsenale.descrizione_bonus())
-	if not _finita:
+	if stato == Stato.GIOCO:
 		_ondate.aggiorna(dt)
 
+
+# --- Flusso della partita ----------------------------------------------------
+
+func _inizia_partita() -> void:
+	_menu.visible = false
+	_hud.visible = true
+	_folla.visible = true
+	stato = Stato.GIOCO
+
+
+func _metti_in_pausa() -> void:
+	if stato != Stato.GIOCO:
+		return
+	stato = Stato.PAUSA
+	_pausa.visible = true
+
+
+func _riprendi() -> void:
+	if stato != Stato.PAUSA:
+		return
+	_pausa.visible = false
+	stato = Stato.GIOCO
+
+
+func _torna_al_menu() -> void:
+	Dati.avvio_diretto = false
+	get_tree().reload_current_scene()
+
+
+func _riprova() -> void:
+	Dati.avvio_diretto = true
+	get_tree().reload_current_scene()
+
+
+func _fine_partita() -> void:
+	if stato == Stato.FINITA:
+		return
+	stato = Stato.FINITA
+	var ondata := _ondate.ondata
+	var nuovo := Dati.registra_partita(ondata)
+	_hud.visible = false
+	_game_over.mostra(ondata, Dati.record, nuovo, _folla.unita_massime, _boss.sconfitti)
+
+
+# --- Eventi di gioco ---------------------------------------------------------
 
 func _on_cancello_attraversato(cancello: Array) -> void:
 	var prima := _folla.unita
@@ -111,22 +188,13 @@ func _on_boss_sconfitto(posizione: Vector3) -> void:
 	_effetti.esplosione(posizione, 4.0)
 	_hud.mostra_esito("BOSS SCONFITTO!", true)
 	# Mentre si sceglie il potenziamento il mondo resta fermo.
-	_in_scelta = true
+	stato = Stato.SCELTA
 	_scelta.mostra(_potenziamenti.proponi(), _potenziamenti)
 
 
 func _on_potenziamento_scelto(id: String) -> void:
 	_potenziamenti.applica(id, _arsenale, _folla, _cancelli.regole.unita_massime)
 	_hud.mostra_esito(_potenziamenti.titolo(id) + "!", true)
-	_in_scelta = false
 	_ondate.sospesa = false
 	_boss.nuova_soglia()
-
-
-func _fine_partita() -> void:
-	_finita = true
-	_game_over.mostra(_ondate.ondata, _folla.unita_massime)
-
-
-func _riprova() -> void:
-	get_tree().reload_current_scene()
+	stato = Stato.GIOCO

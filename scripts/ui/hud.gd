@@ -3,6 +3,8 @@ extends CanvasLayer
 ## Interfaccia durante la partita: ondata in corso, contatore unità, arma e
 ## bonus temporanei, annuncio delle ondate ed esito dei cancelli.
 
+signal pausa_premuta
+
 const COLORE_POSITIVO := Color(0.45, 1.0, 0.5)
 const COLORE_NEGATIVO := Color(1.0, 0.38, 0.32)
 
@@ -20,6 +22,7 @@ var _tween_avviso: Tween
 
 
 func _ready() -> void:
+	$Radice/Pausa.pressed.connect(func() -> void: pausa_premuta.emit())
 	_annuncio.modulate.a = 0.0
 	_esito.modulate.a = 0.0
 

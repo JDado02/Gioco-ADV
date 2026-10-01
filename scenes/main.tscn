@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/game/game.gd" id="1_game"]
 [ext_resource type="Script" path="res://scripts/game/track.gd" id="2_pista"]
@@ -13,6 +13,8 @@
 [ext_resource type="Script" path="res://scripts/game/effects.gd" id="11_effetti"]
 [ext_resource type="Script" path="res://scripts/game/boss_manager.gd" id="12_boss"]
 [ext_resource type="PackedScene" path="res://scenes/ui/upgrade_choice.tscn" id="13_scelta"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu.tscn" id="14_menu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause.tscn" id="15_pausa"]
 
 [sub_resource type="Environment" id="Environment_cielo"]
 background_mode = 1
@@ -94,5 +96,9 @@ effetti = NodePath("../Effetti")
 [node name="HUD" parent="." instance=ExtResource("7_hud")]
 
 [node name="SceltaPotenziamento" parent="." instance=ExtResource("13_scelta")]
+
+[node name="Menu" parent="." instance=ExtResource("14_menu")]
+
+[node name="Pausa" parent="." instance=ExtResource("15_pausa")]
 
 [node name="GameOver" parent="." instance=ExtResource("8_gameover")]
