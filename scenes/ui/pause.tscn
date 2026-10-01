@@ -1,0 +1,66 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/pause.gd" id="1_pausa"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_pulsante"]
+bg_color = Color(0.12, 0.22, 0.48, 0.96)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(1, 0.82, 0.25, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[node name="Pausa" type="CanvasLayer"]
+layer = 9
+script = ExtResource("1_pausa")
+
+[node name="Sfondo" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.08, 0.8)
+
+[node name="Centro" type="CenterContainer" parent="Sfondo"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Riquadro" type="VBoxContainer" parent="Sfondo/Centro"]
+layout_mode = 2
+theme_override_constants/separation = 36
+
+[node name="Titolo" type="Label" parent="Sfondo/Centro/Riquadro"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.86, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.08, 0.02, 1)
+theme_override_constants/outline_size = 18
+theme_override_font_sizes/font_size = 96
+text = "PAUSA"
+horizontal_alignment = 1
+
+[node name="Riprendi" type="Button" parent="Sfondo/Centro/Riquadro"]
+custom_minimum_size = Vector2(440, 130)
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+theme_override_styles/normal = SubResource("StyleBox_pulsante")
+theme_override_styles/hover = SubResource("StyleBox_pulsante")
+theme_override_styles/pressed = SubResource("StyleBox_pulsante")
+text = "Riprendi"
+
+[node name="Menu" type="Button" parent="Sfondo/Centro/Riquadro"]
+custom_minimum_size = Vector2(440, 110)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBox_pulsante")
+theme_override_styles/hover = SubResource("StyleBox_pulsante")
+theme_override_styles/pressed = SubResource("StyleBox_pulsante")
+text = "Torna al menu"
