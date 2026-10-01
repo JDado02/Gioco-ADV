@@ -2,9 +2,10 @@ class_name Pista
 extends Node3D
 ## Pista infinita.
 ##
-## La folla resta sempre attorno a Z = 0: è il mondo che scorre verso la
-## telecamera (asse +Z). In questo modo le coordinate restano piccole anche
-## dopo ore di gioco e non servono segmenti di pista da istanziare.
+## La folla resta sempre attorno a Z = 0. Se [pista] velocita_avanzamento è
+## maggiore di 0 è il mondo a scorrere verso la telecamera (asse +Z), così le
+## coordinate restano piccole e non servono segmenti di pista da istanziare.
+## Con velocità 0 (impostazione attuale) la strada sta ferma.
 
 const LUNGHEZZA_TERRENO := 180.0
 const NUM_ALBERI := 40

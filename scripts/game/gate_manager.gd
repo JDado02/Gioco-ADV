@@ -60,6 +60,7 @@ var regole: RegoleCancelli
 var _meta_pista: float
 var _distanza: float
 var _intervallo: float
+var _velocita: float
 var _p_ostacolo: float
 var _vita_base: float
 var _vita_incremento: float
@@ -78,6 +79,7 @@ func _ready() -> void:
 	_meta_pista = Config.num("pista", "larghezza") * 0.5
 	_distanza = Config.num("nemici", "distanza_comparsa")
 	_intervallo = maxf(Config.num("cancelli", "intervallo"), 1.0)
+	_velocita = Config.num("cancelli", "velocita")
 	_timer = Config.num("cancelli", "ritardo_iniziale")
 	_p_ostacolo = Config.num("cancelli", "probabilita_ostacolo_bonus")
 	_vita_base = Config.num("ostacoli_bonus", "vita_base")
@@ -105,7 +107,8 @@ func aggiorna(delta: float, velocita_pista: float, folla_x: float, unita: int, o
 		else:
 			_genera_coppia(ondata, unita)
 
-	var passo := velocita_pista * delta
+	# Cancelli e barricate vengono incontro alla folla (più l'eventuale scorrimento della pista).
+	var passo := (velocita_pista + _velocita) * delta
 	for c in _coppie:
 		if not c.attiva:
 			continue

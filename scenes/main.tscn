@@ -46,7 +46,7 @@ proiettili = NodePath("../Proiettili")
 arsenale = NodePath("../Arsenale")
 
 [node name="Contatore" type="Label3D" parent="Folla"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9, 0)
 pixel_size = 0.012
 billboard = 1
 no_depth_test = true

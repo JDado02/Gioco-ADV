@@ -23,7 +23,11 @@ const PALETTE_NEMICO_BASE := {
 }
 
 
-## Soldato stilizzato alto circa 1.1, rivolto verso -Z (in avanti).
+## Fattore di grandezza dei soldati (folla e nemici).
+const SCALA_SOLDATO := 1.3
+
+
+## Soldato stilizzato alto circa 1.1 × SCALA_SOLDATO, rivolto verso -Z (in avanti).
 static func soldato(palette: Dictionary) -> ArrayMesh:
 	var parti: Array = [
 		# [dimensioni, centro, colore]
@@ -35,6 +39,9 @@ static func soldato(palette: Dictionary) -> ArrayMesh:
 		[Vector3(0.27, 0.10, 0.27), Vector3(0.0, 1.03, 0.0), palette.elmetto],      # elmetto
 		[Vector3(0.08, 0.08, 0.55), Vector3(0.17, 0.64, -0.24), palette.arma],      # fucile
 	]
+	for p in parti:
+		p[0] *= SCALA_SOLDATO
+		p[1] *= SCALA_SOLDATO
 	return _unisci_blocchi(parti)
 
 

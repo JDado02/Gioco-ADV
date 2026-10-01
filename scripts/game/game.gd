@@ -11,8 +11,8 @@ extends Node3D
 const DELTA_MASSIMO := 1.0 / 20.0
 
 ## Posizione della telecamera: dietro e sopra la folla, guarda in avanti.
-const CAMERA_POSIZIONE := Vector3(0.0, 10.0, 7.5)
-const CAMERA_BERSAGLIO := Vector3(0.0, 0.0, -11.0)
+const CAMERA_POSIZIONE := Vector3(0.0, 14.0, 4.0)
+const CAMERA_BERSAGLIO := Vector3(0.0, 0.0, -12.0)
 
 var _velocita_pista: float
 var _larghezza_pista: float

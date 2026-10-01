@@ -12,11 +12,11 @@ signal unita_cambiate(unita: int)
 signal annientata
 
 ## Altezza della canna del fucile (da dove partono i proiettili).
-const ALTEZZA_CANNA := 0.64
+const ALTEZZA_CANNA := 0.64 * MeshFactory.SCALA_SOLDATO
 ## Spostamento laterale della canna rispetto al centro del soldato.
-const LATO_CANNA := 0.17
+const LATO_CANNA := 0.17 * MeshFactory.SCALA_SOLDATO
 ## Raggio di ingombro di un singolo soldato.
-const RAGGIO_SOLDATO := 0.3
+const RAGGIO_SOLDATO := 0.3 * MeshFactory.SCALA_SOLDATO
 ## Angolo aureo: distribuisce i soldati in una formazione compatta e rotonda.
 const ANGOLO_AUREO := 2.39996323
 
@@ -34,6 +34,7 @@ var _cap: int
 var _passo_formazione: float
 var _ricompattamento: float
 var _meta_pista: float
+var _in_corsa: bool
 
 var _visibili := 0
 var _tempo := 0.0
@@ -51,6 +52,7 @@ func _ready() -> void:
 	_passo_formazione = Config.num("folla", "spaziatura_unita") * 0.6
 	_ricompattamento = Config.num("folla", "velocita_ricompattamento")
 	_meta_pista = Config.num("pista", "larghezza") * 0.5
+	_in_corsa = Config.num("pista", "velocita_avanzamento") > 0.0
 
 	_off_x.resize(_cap)
 	_off_z.resize(_cap)
@@ -120,8 +122,8 @@ func aggiorna(delta: float) -> void:
 		var p := _posto_in_formazione(i)
 		_off_x[i] = lerpf(_off_x[i], p.x, k)
 		_off_z[i] = lerpf(_off_z[i], p.y, k)
-		# Piccolo saltello di corsa, sfasato per ogni soldato.
-		var y := absf(sin(_tempo * 9.0 + i * 1.7)) * 0.08
+		# Piccolo saltello di corsa (solo se la folla avanza), sfasato per ogni soldato.
+		var y := absf(sin(_tempo * 9.0 + i * 1.7)) * 0.08 if _in_corsa else 0.0
 		MultiMeshHelper.scrivi(_buf, i, Vector3(_off_x[i], y, _off_z[i]), 0.0)
 
 		_timer_sparo[i] -= delta

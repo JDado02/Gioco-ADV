@@ -56,6 +56,17 @@ Configura un workflow GitHub Actions che, a ogni push su main, esporti un APK di
 
 ---
 
+## Modifiche al design decise durante lo sviluppo
+
+Queste decisioni del committente sostituiscono il testo originale qui sopra dove sono in conflitto.
+
+1. **La folla non avanza** (dopo la Fase 2). I soldati del giocatore restano fermi in fondo alla strada e si spostano solo a destra e sinistra trascinando il dito. Nemici, cancelli e barricate vengono incontro alla folla. Riferimento: pubblicità del gioco "Top War" (https://youtu.be/YLRMLFW8y9Q).
+   - La strada non scorre (`[pista] velocita_avanzamento = 0`; un valore maggiore di 0 riattiva la corsa).
+   - Cancelli e barricate arrivano a `[cancelli] velocita`; i nemici camminano più veloci di prima per mantenere lo stesso ritmo.
+2. **Strada più larga**: da 9 a 14 metri. La telecamera è più alta e inclinata, così la strada si vede tutta e la squadra sta in basso. I soldati sono più grandi del 30%.
+
+---
+
 ## Punti ambigui o in conflitto (da confermare)
 
 Per ogni punto: la domanda aperta e, tra parentesi quadre, la scelta **provvisoria** fatta in Fase 1 (tutto modificabile da `config/bilanciamento.cfg` quando possibile).

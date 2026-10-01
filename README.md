@@ -2,7 +2,7 @@
 
 Shooter "crowd runner" per Android a ondate infinite, in 3D low-poly, fatto con Godot 4.
 
-Guidi una folla di soldati che avanza da sola su una pista infinita. Trascini il dito a destra e a sinistra per spostarla, e i soldati sparano da soli. Le ondate di nemici sono sempre più numerose. Se ti toccano, perdi soldati. Quando i soldati finiscono, la partita è finita. Il punteggio è l'ondata che hai raggiunto.
+Comandi una squadra di soldati schierata in fondo a una strada larga. Le orde nemiche le vengono incontro. Trascini il dito a destra e a sinistra per spostarla, e i soldati sparano da soli. Le ondate di nemici sono sempre più numerose. Se ti toccano, perdi soldati. Quando i soldati finiscono, la partita è finita. Il punteggio è l'ondata che hai raggiunto.
 
 Lungo la pista arrivano coppie di cancelli (+N, -N, ×N, ÷N): scegli da quale passare, e a volte bisogna fare il conto. Ci sono anche barricate con dei punti vita. Se le abbatti sparando ottieni un'arma migliore (fucile → mitragliatrice → lanciarazzi) o un bonus temporaneo. Però mentre spari a loro non spari ai nemici.
 
