@@ -19,15 +19,15 @@ const ALTEZZA_CANCELLO := 2.4
 const SPESSORE_CANCELLO := 0.12
 ## Spazio vuoto tra i due cancelli di una coppia.
 const SPAZIO_CENTRALE := 0.3
-const ALTEZZA_OSTACOLO := 1.5
-const PROFONDITA_OSTACOLO := 0.9
+const ALTEZZA_OSTACOLO := 2.2
+## Ingombro in profondità dell'ostacolo (per i colpi).
+const PROFONDITA_OSTACOLO := 2.0
 ## Oltre questa distanza dietro la folla un oggetto sparisce.
 const Z_USCITA := 10.0
 const VITA_MINIMA := 0.001
 
 const COLORE_BONUS := Color(0.2, 0.62, 1.0)
 const COLORE_MALUS := Color(1.0, 0.27, 0.22)
-const COLORE_OSTACOLO := Color(0.96, 0.66, 0.16)
 const COLORE_PREMIO_ARMA := Color(0.55, 1.0, 0.95)
 const COLORE_PREMIO_TEMPORANEO := Color(1.0, 0.92, 0.35)
 
@@ -72,6 +72,7 @@ var _coppie: Array[Coppia] = []
 var _ostacoli: Array[Ostacolo] = []
 var _mat_pannello := {}
 var _mat_cornice := {}
+var _mesh_barile: ArrayMesh
 
 
 func _ready() -> void:
@@ -93,6 +94,8 @@ func _ready() -> void:
 		_mat_cornice[malus] = _materiale(colore, false)
 	for i in MAX_COPPIE:
 		_coppie.append(_crea_coppia())
+	_mesh_barile = MeshFactory.barile()
+	_mesh_barile.surface_set_material(0, MeshFactory.materiale_colori_vertice())
 	for i in MAX_OSTACOLI:
 		_ostacoli.append(_crea_ostacolo())
 	arsenale.arma_cambiata.connect(func(_arma: Dictionary) -> void: _aggiorna_premi())
@@ -127,6 +130,8 @@ func aggiorna(delta: float, velocita_pista: float, folla_x: float, unita: int, o
 		if not o.attivo:
 			continue
 		o.nodo.position.z += passo
+		# Superata la folla, la scritta del premio sparirebbe dietro la telecamera ingigantita.
+		o.testo_premio.visible = o.nodo.position.z < -3.0
 		var vita_intera := ceili(o.vita)
 		if vita_intera != o.vita_mostrata:
 			o.vita_mostrata = vita_intera
@@ -287,22 +292,18 @@ func _crea_ostacolo() -> Ostacolo:
 	o.nodo.name = "Ostacolo"
 	o.nodo.visible = false
 	add_child(o.nodo)
-	var larghezza := _meta_larghezza_ostacolo * 2.0
-	var cassa := _blocco(o.nodo, Vector3(larghezza, ALTEZZA_OSTACOLO, PROFONDITA_OSTACOLO),
-			Vector3(0, ALTEZZA_OSTACOLO * 0.5, 0))
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = COLORE_OSTACOLO
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_PER_VERTEX
-	cassa.material_override = mat
-	# Fascia scura per dare l'idea di una barricata rinforzata.
-	var fascia := _blocco(o.nodo, Vector3(larghezza + 0.04, 0.22, PROFONDITA_OSTACOLO + 0.04),
-			Vector3(0, ALTEZZA_OSTACOLO * 0.72, 0))
-	fascia.material_override = _materiale(Color(0.25, 0.2, 0.15), false)
-	o.testo_vita = _etichetta(170, Color.WHITE)
-	o.testo_vita.position = Vector3(0, ALTEZZA_OSTACOLO * 0.42, PROFONDITA_OSTACOLO * 0.5 + 0.02)
+	# Un grosso barile giallo con i punti vita scritti davanti.
+	var raggio := _meta_larghezza_ostacolo
+	var barile := MeshInstance3D.new()
+	barile.mesh = _mesh_barile
+	barile.scale = Vector3(raggio, ALTEZZA_OSTACOLO / 1.9, raggio)
+	barile.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	o.nodo.add_child(barile)
+	o.testo_vita = _etichetta(190, Color.WHITE)
+	o.testo_vita.position = Vector3(0, ALTEZZA_OSTACOLO * 0.45, raggio + 0.05)
 	o.nodo.add_child(o.testo_vita)
 	o.testo_premio = _etichetta(80, COLORE_PREMIO_ARMA)
-	o.testo_premio.position = Vector3(0, ALTEZZA_OSTACOLO + 0.55, 0)
+	o.testo_premio.position = Vector3(0, ALTEZZA_OSTACOLO + 0.6, 0)
 	o.testo_premio.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	o.nodo.add_child(o.testo_premio)
 	return o
