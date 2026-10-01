@@ -26,6 +26,8 @@ const PASSO_ORDA := 0.62 * MeshFactory.SCALA_SOLDATO
 const RAGGIO_PROIETTILE_NEMICO := 0.35
 const ANGOLO_AUREO := 2.39996323
 
+@export var effetti: GestoreEffetti
+
 ## Membri uccisi dal giocatore in tutta la partita (serve per i mini boss).
 var uccisi_totali := 0
 ## Gruppi attualmente in campo.
@@ -265,7 +267,10 @@ func _ferisci(j: int, danno: float) -> void:
 	_vita[j] -= danno
 	var rimasti := maxi(ceili(_vita[j] / _vita_membro[j] - 0.0001), 0)
 	if rimasti < _numero[j]:
-		uccisi_totali += _numero[j] - rimasti
+		var morti := _numero[j] - rimasti
+		uccisi_totali += morti
+		effetti.detriti(Vector3(_x[j], 0.8, _z[j]), mini(morti, 5) * 3, GestoreEffetti.Colore.NEMICO)
+		Suoni.suona("morte")
 		_numero[j] = rimasti
 		_raggio_gruppo[j] = raggio_per(maxi(rimasti, 1), _tipo[j])
 		if _etichetta[j] >= 0:

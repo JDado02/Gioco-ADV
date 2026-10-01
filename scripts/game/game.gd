@@ -22,6 +22,8 @@ var _velocita_pista: float
 var _larghezza_pista: float
 var _sensibilita: float
 var _potenziamenti := Potenziamenti.new()
+## Intensità della scossa della telecamera (decade da sola).
+var _scossa := 0.0
 
 @onready var _pista: Pista = $Pista
 @onready var _arsenale: Arsenale = $Arsenale
@@ -53,9 +55,13 @@ func _ready() -> void:
 	_cancelli.cancello_attraversato.connect(_on_cancello_attraversato)
 	_cancelli.ostacolo_distrutto.connect(_on_ostacolo_distrutto)
 	_arsenale.arma_cambiata.connect(_on_arma_cambiata)
-	_boss.avviso.connect(func() -> void: _hud.mostra_avviso("BOSS IN ARRIVO", Config.num("boss", "durata_avviso")))
+	_boss.avviso.connect(func() -> void:
+		_hud.mostra_avviso("BOSS IN ARRIVO", Config.num("boss", "durata_avviso"))
+		Suoni.suona("avviso_boss"))
 	_boss.fase_due.connect(func() -> void: _hud.mostra_esito("SCUDO!", false))
-	_boss.arrabbiato.connect(func() -> void: _hud.mostra_avviso("IL BOSS AVANZA!", 2.0))
+	_boss.arrabbiato.connect(func() -> void:
+		_hud.mostra_avviso("IL BOSS AVANZA!", 2.0)
+		Suoni.suona("avviso_boss"))
 	_boss.colpo_a_segno.connect(func(perse: int) -> void: _hud.mostra_esito("-%d" % perse, false))
 	_boss.sconfitto.connect(_on_boss_sconfitto)
 	_scelta.scelto.connect(_on_potenziamento_scelto)
@@ -115,8 +121,11 @@ func _process(delta: float) -> void:
 	_proiettili.aggiorna(dt)
 	var perdite := _nemici.aggiorna(dt, _velocita_pista, _folla.position.x, _folla.raggio)
 	perdite += _boss.aggiorna(dt, _folla.position.x, _folla.raggio, _folla.unita, maxi(_ondate.ondata, 1))
-	_folla.perdi(perdite)
+	var perse := _folla.perdi(perdite)
+	if perse > 0:
+		_feedback_perdite(perse)
 	_effetti.aggiorna(dt, _velocita_pista)
+	_aggiorna_scossa(dt)
 	_hud.aggiorna_bonus(_arsenale.descrizione_bonus())
 	if stato == Stato.GIOCO:
 		_ondate.aggiorna(dt)
@@ -125,6 +134,7 @@ func _process(delta: float) -> void:
 # --- Flusso della partita ----------------------------------------------------
 
 func _inizia_partita() -> void:
+	Suoni.suona("clic")
 	_menu.visible = false
 	_hud.visible = true
 	_folla.visible = true
@@ -136,6 +146,7 @@ func _metti_in_pausa() -> void:
 		return
 	stato = Stato.PAUSA
 	_pausa.visible = true
+	Suoni.suona("clic")
 
 
 func _riprendi() -> void:
@@ -162,6 +173,7 @@ func _fine_partita() -> void:
 	var ondata := _ondate.ondata
 	var nuovo := Dati.registra_partita(ondata)
 	_hud.visible = false
+	Suoni.suona("sconfitta")
 	_game_over.mostra(ondata, Dati.record, nuovo, _folla.unita_massime, _boss.sconfitti)
 
 
@@ -171,11 +183,13 @@ func _on_cancello_attraversato(cancello: Array) -> void:
 	var prima := _folla.unita
 	var dopo := _cancelli.regole.applica(cancello, prima)
 	_folla.imposta_unita(dopo)
+	Suoni.suona("cancello_buono" if dopo >= prima else "cancello_cattivo")
 	_hud.mostra_esito("%s  →  %d" % [RegoleCancelli.testo(cancello), dopo], dopo >= prima)
 
 
 func _on_ostacolo_distrutto(ricompensa: String, posizione: Vector3) -> void:
 	_effetti.esplosione(posizione, 1.6)
+	Suoni.suona("bonus")
 	_hud.mostra_esito(_arsenale.ottieni(ricompensa) + "!", true)
 
 
@@ -186,13 +200,31 @@ func _on_arma_cambiata(arma: Dictionary) -> void:
 
 func _on_boss_sconfitto(posizione: Vector3) -> void:
 	_effetti.esplosione(posizione, 4.0)
+	Suoni.suona("vittoria")
+	_scossa = 0.6
 	_hud.mostra_esito("BOSS SCONFITTO!", true)
 	# Mentre si sceglie il potenziamento il mondo resta fermo.
 	stato = Stato.SCELTA
 	_scelta.mostra(_potenziamenti.proponi(), _potenziamenti)
 
 
+## Detriti blu, lampo rosso, scossa e suono quando la folla perde unità.
+func _feedback_perdite(perse: int) -> void:
+	_effetti.detriti(_folla.position + Vector3(0, 0.8, 0), mini(perse, 8) * 3, GestoreEffetti.Colore.GIOCATORE)
+	Suoni.suona("perdita")
+	var peso := float(perse) / maxf(_folla.unita + perse, 1.0)
+	_hud.lampo_danno(0.1 + peso)
+	_scossa = maxf(_scossa, minf(0.12 + peso * 1.5, 0.7))
+
+
+func _aggiorna_scossa(delta: float) -> void:
+	_scossa = maxf(_scossa - delta * 1.8, 0.0)
+	_camera.h_offset = randf_range(-1.0, 1.0) * _scossa * 0.5
+	_camera.v_offset = randf_range(-1.0, 1.0) * _scossa * 0.5
+
+
 func _on_potenziamento_scelto(id: String) -> void:
+	Suoni.suona("bonus")
 	_potenziamenti.applica(id, _arsenale, _folla, _cancelli.regole.unita_massime)
 	_hud.mostra_esito(_potenziamenti.titolo(id) + "!", true)
 	_ondate.sospesa = false

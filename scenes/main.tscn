@@ -77,8 +77,9 @@ effetti = NodePath("../Effetti")
 boss = NodePath("../Boss")
 arsenale = NodePath("../Arsenale")
 
-[node name="Nemici" type="Node3D" parent="."]
+[node name="Nemici" type="Node3D" parent="." node_paths=PackedStringArray("effetti")]
 script = ExtResource("5_nemici")
+effetti = NodePath("../Effetti")
 
 [node name="Effetti" type="Node3D" parent="."]
 script = ExtResource("11_effetti")

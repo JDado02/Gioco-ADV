@@ -130,6 +130,7 @@ func aggiorna(delta: float) -> void:
 	var arma := arsenale.arma()
 	var intervallo_sparo := 1.0 / arsenale.cadenza()
 	var danno_aggregato := arsenale.danno() * float(unita) / float(_visibili)
+	var ha_sparato := false
 	for i in _visibili:
 		var p := _posto_in_formazione(i)
 		_off_x[i] = lerpf(_off_x[i], p.x, k)
@@ -144,9 +145,12 @@ func aggiorna(delta: float) -> void:
 			proiettili.spara(
 				Vector3(position.x + _off_x[i] + LATO_CANNA, ALTEZZA_CANNA, _off_z[i] - 0.5),
 				danno_aggregato, arma)
+			ha_sparato = true
 
 	_mm.visible_instance_count = _visibili
 	_mm.buffer = _buf
+	if ha_sparato:
+		Suoni.suona("razzo" if arma.raggio_esplosione > 0.0 else "sparo")
 
 
 ## Posizione (x, z) del soldato numero i nella formazione a girasole.

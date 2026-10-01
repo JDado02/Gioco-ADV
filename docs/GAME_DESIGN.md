@@ -65,6 +65,9 @@ Queste decisioni del committente sostituiscono il testo originale qui sopra dove
    - Cancelli e barricate arrivano a `[cancelli] velocita`; i nemici camminano più veloci di prima per mantenere lo stesso ritmo.
 2. **Strada più larga**: da 9 a 14 metri. La telecamera è più alta e inclinata, così la strada si vede tutta e la squadra sta in basso. I soldati sono più grandi del 30%.
 
+3. **Più simile alle pubblicità di Top War** (dalla Fase 3 in poi). Ponte di notte sopra il mare con ringhiere, lampioni e braci. Soldati massicci con elmetto bianco e divisa blu. Orde rosse con un contatore sopra, ostacoli bonus a forma di barile giallo con il numero, boss gigante con barra della vita.
+4. **Completare tutte le fasi senza fermarsi.** Per i punti ancora aperti sono state adottate le proposte di Claude, riportate qui sotto.
+
 ---
 
 ## Punti ambigui o in conflitto (da confermare)
@@ -117,3 +120,34 @@ Per ogni punto: la domanda aperta e, tra parentesi quadre, la scelta **provvisor
 19. **Keystore di debug**: il design dice "generata nel workflow". Se fosse rigenerata a ogni build, ogni nuovo APK avrebbe una firma diversa e bisognerebbe disinstallare il gioco prima di aggiornarlo.
     [Viene generata nel workflow ma conservata nella cache di GitHub Actions. Se la cache scade (7 giorni senza build) ne viene creata una nuova e bisogna disinstallare una volta.]
 20. **"Ultima versione stabile" di Godot**: [4.7.2, fissata nel workflow (`GODOT_VERSION`). Gli aggiornamenti si fanno a mano, per evitare che una nuova versione rompa la build all'improvviso.]
+
+### Scelte adottate nelle fasi 3–6 (le risposte ai punti sopra, salvo diversa indicazione)
+- **Nemici a distanza (punto 5)**: il tiratore viola si ferma a 24 metri e spara. Ogni colpo uccide 1 unità e va dritto verso il punto in cui eri, quindi spostandoti lo schivi.
+- **Gruppi numerosi (punto 9)**: dall'ondata 3 compaiono le ORDE. Sono gruppi compatti con un contatore sopra e ne vengono disegnati al massimo 12 soldati. Ogni colpo toglie vita al gruppo e il numero scende. Se un'orda ti tocca, ogni membro rimasto uccide le sue unità.
+- **Varianti**:
+  - veloce (arancione, dall'ondata 4);
+  - corazzato (grigio con scudo, 4 volte la vita, dall'ondata 7);
+  - tiratore (viola, dall'ondata 10).
+
+  Ogni variante ha un peso che decide quanto spesso compare.
+- **Mini boss (punto 14)**:
+  - il contatore conta solo i nemici abbattuti sparando e si azzera a ogni boss;
+  - durante il boss non arrivano nuove ondate (quelle già in campo restano), mentre cancelli e barili continuano ad arrivare;
+  - attacchi: zona rossa mirata, mezza strada, doppia zona in fase 2;
+  - fase 2 sotto metà vita: scudo per 4 secondi, poi attacchi più frequenti;
+  - se il boss resiste più di 60 secondi avanza e travolge la folla.
+- **"Unità più resistenti" (punto 4)**: è una probabilità di sopravvivere a ogni colpo o contatto, +15% per ogni scelta fino al 60%.
+- **Potenziamenti**: fuoco più rapido, colpi più potenti, tiro lungo, rinforzi, colpi esplosivi, soldati corazzati.
+- **Record**: si salva solo l'ondata più alta (`user://salvataggio.cfg`), insieme all'impostazione dell'audio.
+- **Suoni**: generati via codice all'avvio, senza file esterni.
+- **Effetti**: detriti, scintille, esplosioni, lampo rosso e scossa della telecamera quando perdi unità.
+- **Lingua (punto 17)**: la scritta "GAME OVER" è rimasta in inglese. Si può cambiare in `scenes/ui/game_over.tscn`.
+- **Bilanciamento finale** (simulazioni con giocatori virtuali, 5 partite ciascuno):
+
+  | Giocatore simulato | Ondata raggiunta | Durata |
+  |---|---|---|
+  | Perfetto | 42–96 | 13–30 minuti |
+  | Scelte a caso | 6–26 | — |
+  | Sempre fermo | 2–28 | — |
+
+  Un giocatore umano bravo dovrebbe stare in mezzo.

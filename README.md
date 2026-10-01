@@ -1,17 +1,27 @@
 # ORDA ZERO
 
-Shooter "crowd runner" per Android a ondate infinite, in 3D low-poly, fatto con Godot 4.
+Shooter per Android a ondate infinite, in 3D low-poly, fatto con Godot 4 e ispirato alle pubblicità di Top War. Tutta la grafica e tutti i suoni sono originali.
 
-Comandi una squadra di soldati schierata in fondo a una strada larga. Le orde nemiche le vengono incontro. Trascini il dito a destra e a sinistra per spostarla, e i soldati sparano da soli. Le ondate di nemici sono sempre più numerose. Se ti toccano, perdi soldati. Quando i soldati finiscono, la partita è finita. Il punteggio è l'ondata che hai raggiunto.
+Comandi una squadra di soldati schierata in fondo a un ponte, di notte. Le orde nemiche ti vengono incontro. Trascini il dito a destra e a sinistra per spostare la squadra, e i soldati sparano da soli. Se i nemici ti toccano perdi soldati, e quando li perdi tutti la partita finisce. Il punteggio è l'ondata che hai raggiunto.
 
-Lungo la pista arrivano coppie di cancelli (+N, -N, ×N, ÷N): scegli da quale passare, e a volte bisogna fare il conto. Ci sono anche barricate con dei punti vita. Se le abbatti sparando ottieni un'arma migliore (fucile → mitragliatrice → lanciarazzi) o un bonus temporaneo. Però mentre spari a loro non spari ai nemici.
+## Come si gioca
+- **Cancelli** (+N, -N, ×N, ÷N): arrivano a coppie. Passi da quello del lato in cui ti trovi, e a volte bisogna fare il conto.
+- **Barili gialli**: hanno i punti vita scritti sopra. Se li abbatti ottieni l'arma successiva (fucile → mitragliatrice → lanciarazzi) o un bonus temporaneo. Mentre spari a loro, però, non spari ai nemici.
+- **Nemici**:
+  - rossi (base);
+  - arancioni (veloci);
+  - grigi con scudo (corazzati);
+  - viola (tiratori, che sparano da lontano: schiva i colpi spostandoti).
+
+  Dall'ondata 3 arrivano anche le **orde**, con un contatore sopra.
+- **Mini boss**: compare l'avviso "BOSS IN ARRIVO". Il boss lancia attacchi ad area segnalati da zone rosse a terra: trascina la squadra fuori. Sotto metà vita alza uno scudo. Quando lo sconfiggi scegli **1 potenziamento su 3**, che vale per il resto della partita.
+- **Record**: viene salvata l'ondata più alta. Puoi mettere in pausa col pulsante in alto o col tasto indietro.
 
 - Schermo verticale, lingua italiana, nessuna pubblicità né acquisto.
 - Difficile ma mai impossibile: conta la bravura, non la fortuna.
-- Il design completo è in [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md).
+- Il design completo e le scelte fatte sono in [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md).
 
-> **Stato:** Fase 2 di 6 (in più rispetto alla Fase 1: cancelli a coppie, malus con limite, ostacoli bonus e armi).
-> Varianti di nemici, boss e record arriveranno nelle fasi successive.
+> **Stato:** tutte e 6 le fasi completate (versione 1.0.0).
 
 ## Scaricare e installare l'APK sul telefono
 
@@ -48,18 +58,19 @@ Struttura:
 |---|---|
 | `config/bilanciamento.cfg` | Tutti i parametri di bilanciamento |
 | `scenes/main.tscn` | Scena della partita |
-| `scenes/ui/` | HUD e schermata di game over |
-| `scripts/autoload/config.gd` | Lettura del file di bilanciamento (`Config`) |
-| `scripts/game/` | Pista, folla, proiettili, nemici, ondate, cancelli, armi, effetti e regia della partita |
+| `scenes/ui/` | HUD, menu, pausa, scelta dei potenziamenti, game over |
+| `scripts/autoload/` | `Config` (file di bilanciamento), `Dati` (record e audio), `Suoni` (effetti sonori generati via codice) |
+| `scripts/game/` | Ponte, folla, proiettili, nemici e orde, ondate, cancelli, armi, boss, potenziamenti, effetti e regia della partita |
 | `scripts/ui/` | Script dell'interfaccia |
-| `scripts/util/` | Mesh low-poly generate via codice e aiuti per i MultiMesh |
-| `shaders/pista.gdshader` | Terreno della pista infinita |
+| `scripts/util/` | Modelli low-poly generati via codice (soldati, barili, ...) e aiuti per i MultiMesh |
+| `shaders/pista.gdshader` | Strada del ponte e mare |
 | `.github/workflows/android-debug-apk.yml` | Build automatica dell'APK |
 
 Note tecniche:
 
-- Folla, nemici, proiettili e alberi sono disegnati con **MultiMeshInstance3D**, e i dati sono tenuti in pool di array: durante la partita non viene istanziato nessun nodo.
-- La folla resta ferma attorno all'origine ed è il mondo a scorrere verso la telecamera, così le coordinate restano sempre piccole.
+- Folla, nemici, orde, proiettili, ringhiere, braci e particelle sono disegnati con **MultiMeshInstance3D**. Tutti i dati sono in pool di array e i nodi (cancelli, barili, etichette, zone del boss) vengono creati all'avvio e riusati: durante la partita non viene istanziato nessun nodo.
+- La squadra resta ferma ed è tutto il resto a venirle incontro. Con `[pista] velocita_avanzamento` maggiore di 0 la strada scorre e la squadra "corre".
+- Nel caso peggiore (120 gruppi e oltre 1500 nemici in campo) la logica di gioco costa in media circa 2 ms per fotogramma su un PC. Il costo su un telefono va verificato sul campo: se il gioco scatta, abbassa `max_nemici_attivi` e `membri_visibili_massimi`.
 - I soldati disegnati sono al massimo `visual_unit_cap`. Il danno invece è calcolato sul numero **reale** di unità: ogni proiettile visibile porta un danno aggregato, e se avanza danno dopo aver ucciso un nemico continua sul successivo.
 
 ## Sicurezza

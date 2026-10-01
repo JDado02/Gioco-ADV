@@ -102,6 +102,9 @@ func aggiorna(delta: float) -> void:
 				residuo = boss.colpisci(_x[i], z_dopo, z_prima, _raggio[i], residuo)
 			if residuo > 0.0:
 				residuo = nemici.colpisci(_x[i], z_dopo, z_prima, _raggio[i], residuo)
+			if residuo < iniziale:
+				effetti.scintilla(Vector3(_x[i], _y[i], z_dopo))
+				Suoni.suona("colpo")
 			if residuo < iniziale and arsenale.area_raggio > 0.0:
 				# Potenziamento "colpi esplosivi": ferisce anche chi sta intorno.
 				nemici.danno_area(_x[i], z_dopo, arsenale.area_raggio, (iniziale - residuo) * arsenale.area_frazione)

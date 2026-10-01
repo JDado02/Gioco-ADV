@@ -19,6 +19,7 @@ const COLORE_NEGATIVO := Color(1.0, 0.38, 0.32)
 var _tween_annuncio: Tween
 var _tween_esito: Tween
 var _tween_avviso: Tween
+var _tween_lampo: Tween
 
 
 func _ready() -> void:
@@ -44,6 +45,16 @@ func mostra_ondata(numero: int) -> void:
 	_ondata.text = "ONDATA %d" % numero
 	_annuncio.text = "ONDATA %d" % numero
 	_tween_annuncio = _anima(_annuncio, _tween_annuncio, 0.9)
+
+
+## Lampo rosso sullo schermo quando si perdono unità (più forte se le perdite sono tante).
+func lampo_danno(intensita: float) -> void:
+	if _tween_lampo:
+		_tween_lampo.kill()
+	var lampo: ColorRect = $Lampo
+	lampo.color.a = clampf(intensita, 0.08, 0.4)
+	_tween_lampo = create_tween()
+	_tween_lampo.tween_property(lampo, "color:a", 0.0, 0.35)
 
 
 ## Avviso grande e lampeggiante (es. "BOSS IN ARRIVO") per `durata` secondi.
