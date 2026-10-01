@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Icona originale di ORDA ZERO: elmetto stilizzato su fondo scuro con uno "0" -->
+  <rect width="256" height="256" rx="48" fill="#152238"/>
+  <circle cx="128" cy="128" r="92" fill="#1f3a66"/>
+  <path d="M58 142 C58 86 90 60 128 60 C166 60 198 86 198 142 Z" fill="#2e75ea"/>
+  <rect x="44" y="138" width="168" height="22" rx="11" fill="#1a4aa0"/>
+  <rect x="96" y="160" width="64" height="44" rx="10" fill="#f5c7a0"/>
+  <ellipse cx="128" cy="106" rx="20" ry="28" fill="none" stroke="#ffd34d" stroke-width="12"/>
+</svg>
